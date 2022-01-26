@@ -43,7 +43,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
         exampleExternalContract = await ExampleExternalContract.deploy();
       });
       it("Should deploy Staker", async function () {
-        const Staker = await ethers.getContractFactory("Staker");
+        const Staker = await ethers.getContractFactory("Staker2");
         stakerContract = await Staker.deploy(exampleExternalContract.address);
       });
     }
@@ -115,57 +115,71 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
           expect(result).to.equal(true);
         });
 
-        //   it("Should redeploy Staker, stake, not get enough, and withdraw", async function () {
-        //     const [ owner, secondAccount ] = await ethers.getSigners();
+        it("Should redeploy Staker, stake, not get enough, and withdraw", async function () {
+          const [owner, secondAccount] = await ethers.getSigners();
 
-        //     const ExampleExternalContract = await ethers.getContractFactory("ExampleExternalContract");
-        //     exampleExternalContract = await ExampleExternalContract.deploy();
+          const ExampleExternalContract = await ethers.getContractFactory(
+            "ExampleExternalContract"
+          );
+          exampleExternalContract = await ExampleExternalContract.deploy();
 
-        //     const Staker = await ethers.getContractFactory("Staker");
-        //     stakerContract = await Staker.deploy(exampleExternalContract.address);
+          const Staker = await ethers.getContractFactory("Staker2");
+          stakerContract = await Staker.deploy(exampleExternalContract.address);
 
-        //     console.log('\t'," 🔨 Staking...")
-        //     const stakeResult = await stakerContract.stake({value: ethers.utils.parseEther("0.001")});
-        //     console.log('\t'," 🏷  stakeResult: ",stakeResult.hash)
+          console.log("\t", " 🔨 Staking...");
+          const stakeResult = await stakerContract.stake({
+            value: ethers.utils.parseEther("0.001"),
+          });
+          console.log("\t", " 🏷  stakeResult: ", stakeResult.hash);
 
-        //     console.log('\t'," ⏳ Waiting for confirmation...")
-        //     const txResult =  await stakeResult.wait()
-        //     expect(txResult.status).to.equal(1);
+          console.log("\t", " ⏳ Waiting for confirmation...");
+          const txResult = await stakeResult.wait();
+          expect(txResult.status).to.equal(1);
 
-        //     console.log('\t'," ⌛️ fast forward time...")
-        //     await network.provider.send("evm_increaseTime", [3600])
-        //     await network.provider.send("evm_mine")
+          console.log("\t", " ⌛️ fast forward time...");
+          await network.provider.send("evm_increaseTime", [3600]);
+          await network.provider.send("evm_mine");
 
-        //     console.log('\t'," 🎉 calling execute")
-        //     const execResult = await stakerContract.execute();
-        //     console.log('\t'," 🏷  execResult: ",execResult.hash)
+          console.log("\t", " 🎉 calling execute");
+          const execResult = await expect(
+            stakerContract.execute()
+          ).to.be.revertedWith("Eth balance must be at least 1 Eth");
+          console.log("\t", " 🏷  execResult: ", execResult.hash);
 
-        //     const result = await exampleExternalContract.completed()
-        //     console.log('\t'," 🥁 complete should be false: ",result)
-        //     expect(result).to.equal(false);
+          const result = await exampleExternalContract.completed();
+          console.log("\t", " 🥁 complete should be false: ", result);
+          expect(result).to.equal(false);
 
-        //     const startingBalance = await ethers.provider.getBalance(secondAccount.address);
-        //     //console.log("startingBalance before withdraw", ethers.utils.formatEther(startingBalance))
+          const startingBalance = await ethers.provider.getBalance(
+            secondAccount.address
+          );
 
-        //     console.log('\t'," 💵 calling withdraw")
-        //     const withdrawResult = await stakerContract.withdraw(secondAccount.address);
-        //     console.log('\t'," 🏷  withdrawResult: ",withdrawResult.hash)
+          console.log("\t", " 💵 calling withdraw");
+          const withdrawResult = await stakerContract.withdraw(
+            secondAccount.address
+          );
+          console.log("\t", " 🏷  withdrawResult: ", withdrawResult.hash);
 
-        //     const endingBalance = await ethers.provider.getBalance(secondAccount.address);
-        //     //console.log("endingBalance after withdraw", ethers.utils.formatEther(endingBalance))
+          const endingBalance = await ethers.provider.getBalance(
+            secondAccount.address
+          );
 
-        //     expect(endingBalance).to.equal(startingBalance.add(ethers.utils.parseEther("0.001")));
-
-        //   });
+          expect(endingBalance).to.equal(
+            startingBalance.add(ethers.utils.parseEther("0.001"))
+          );
+        });
       }
       // //
 
-      /*it("Should track tokens of owner by index", async function () {
-        const [ owner ] = await ethers.getSigners();
-        const startingBalance = await myContract.balanceOf(owner.address)
-        const token = await myContract.tokenOfOwnerByIndex(owner.address,startingBalance.sub(1));
-        expect(token.toNumber()).to.greaterThan(0);
-      });*/
+      // it("Should track tokens of owner by index", async function () {
+      //   const [owner] = await ethers.getSigners();
+      //   const startingBalance = await myContract.balanceOf(owner.address);
+      //   const token = await myContract.tokenOfOwnerByIndex(
+      //     owner.address,
+      //     startingBalance.sub(1)
+      //   );
+      //   expect(token.toNumber()).to.greaterThan(0);
+      // });
     });
   });
 });
