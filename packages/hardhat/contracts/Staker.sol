@@ -4,6 +4,26 @@ import "hardhat/console.sol";
 import "./ExampleExternalContract.sol";
 
 contract Staker {
+    modifier deadlineExpired() {
+        require(block.timestamp + 30 >= deadline, "deadline not reached");
+        _;
+    }
+
+    modifier deadlineNotExpired() {
+        require(block.timestamp < deadline, 'Already passed deadline."');
+        _;
+    }
+
+    modifier thresholdReached() {
+        require(address(this).balance >= threshold, "Threshold not reached");
+        _;
+    }
+
+    modifier thresholdNotReached() {
+        require(address(this).balance < threshold, "Threshold reached");
+        _;
+    }
+
     ExampleExternalContract public exampleExternalContract;
 
     constructor(address exampleExternalContractAddress) public {
@@ -22,8 +42,7 @@ contract Staker {
 
     // Collect funds in a payable `stake()` function and track individual `balances` with a mapping:
     //  ( make sure to add a `Stake(address,uint256)` event and emit it for the frontend <List/> display )
-    function stake() public payable {
-        require(block.timestamp + 30 seconds > deadline);
+    function stake() public payable deadlineNotExpired {
         balances[msg.sender] = msg.value;
         emit Stake(msg.sender, msg.value);
     }
@@ -31,8 +50,7 @@ contract Staker {
     // After some `deadline` allow anyone to call an `execute()` function
     //  It should either call `exampleExternalContract.complete{value: address(this).balance}()` to send all the value
 
-    function execute() public {
-        require(block.timestamp + 30 seconds > deadline);
+    function execute() public deadlineExpired thresholdReached {
         require(
             address(this).balance >= 1 ether,
             "Eth balance must be at least 1 Eth"
@@ -42,7 +60,11 @@ contract Staker {
 
     // if the `threshold` was not met, allow everyone to call a `withdraw()` function
 
-    function withdraw(address payable _to) public {
+    function withdraw(address payable _to)
+        public
+        deadlineExpired
+        thresholdNotReached
+    {
         uint256 withdrawalAmount = balances[msg.sender];
         require(withdrawalAmount > 0, "Not enough balance");
         balances[msg.sender] = 0;

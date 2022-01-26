@@ -43,7 +43,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
         exampleExternalContract = await ExampleExternalContract.deploy();
       });
       it("Should deploy Staker", async function () {
-        const Staker = await ethers.getContractFactory("Staker2");
+        const Staker = await ethers.getContractFactory("Staker");
         stakerContract = await Staker.deploy(exampleExternalContract.address);
       });
     }
@@ -123,7 +123,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
           );
           exampleExternalContract = await ExampleExternalContract.deploy();
 
-          const Staker = await ethers.getContractFactory("Staker2");
+          const Staker = await ethers.getContractFactory("Staker");
           stakerContract = await Staker.deploy(exampleExternalContract.address);
 
           console.log("\t", " 🔨 Staking...");
@@ -143,7 +143,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
           console.log("\t", " 🎉 calling execute");
           const execResult = await expect(
             stakerContract.execute()
-          ).to.be.revertedWith("Eth balance must be at least 1 Eth");
+          ).to.be.revertedWith("Threshold not reached");
           console.log("\t", " 🏷  execResult: ", execResult.hash);
 
           const result = await exampleExternalContract.completed();
